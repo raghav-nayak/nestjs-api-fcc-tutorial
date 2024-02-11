@@ -71,3 +71,67 @@ and remove the references from `src/app.module.js`
 	- imports
 	- exports
 
+
+### building application
+
+default port is 3000.
+
+To run application, `$yarn start:dev`
+it creates `dist` folder at the root level for js files.
+
+**creating a new module**
+```sh
+$ nest g module user
+CREATE src/user/user.module.ts (81 bytes)
+UPDATE src/app.module.ts (216 bytes)
+```
+where g - generate
+This 
+- creates a folder inside `src` folder with name `user`
+- creates a file called `user.module.ts` inside `src/user`  
+- updates `imports` inside `app.module.ts`
+
+annotation for controller class - `@Controller()`
+annotation for service class - `@Injectable`
+
+Controllers receive request and call service do a task.
+
+#### Dependency Injection
+```ts
+@Controller()
+export class AuthController {
+    constructor(private authService: AuthService) {
+    }
+}
+```
+
+this is equivalent to
+```ts
+@Controller()
+export class AuthController {
+	authService: AuthService
+    constructor(authService: AuthService) {
+	    this.authService = authService
+    }
+ }
+```
+
+### creating routes
+```ts
+@Controller("auth")
+export class AuthController {
+    constructor(private authService: AuthService) {}
+
+    @Post("signup")
+    signUp() {}
+
+    @Post("login")
+    login(){}
+}
+```
+
+`@Controller("auth")`  - global prefix for auth
+the request would look like /auth/signup
+
+When you check the response headers in Postman, you will see
+`X-Powered-By: Express` 
