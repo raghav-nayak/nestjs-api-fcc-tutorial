@@ -20,7 +20,6 @@ model User {
 
     firstName String?
     lastName String?
-
 }
 
 model Bookmark {
