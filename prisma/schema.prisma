@@ -15,11 +15,15 @@ model User {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    email String
+    email String @unique
     hash String
 
     firstName String?
     lastName String?
+
+    @@map("Users") // table name in the database
+
+    bookmarks Bookmark[] // to denote the User is referenced in Bookmark
 }
 
 model Bookmark {
@@ -30,4 +34,11 @@ model Bookmark {
     title String
     description String?
     link String
+
+    // foreign key
+    userId Int
+    // userId is local field and id is the foreign key from User table
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("bookmarks") // table name in the database
 }

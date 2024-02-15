@@ -1,14 +1,45 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import * as argon from "argon2";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthDto } from "./dto";
 
+
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService) {
-        
-    }
-    signUp(dto: AuthDto) {
-        return { msg: "You are now signed up"}
+    constructor(private prisma: PrismaService) { }
+    
+    async signUp(dto: AuthDto) {
+        // generate the password hash
+        const hash = await argon.hash(dto.password);
+
+        try {
+            // save the new user in the db
+            const user = await this.prisma.user.create({
+                data: {
+                    email: dto.email,
+                    hash,
+                },
+                // // to select the required fields
+                // select: {
+                //     id: true,
+                //     email: true,
+                //     createdAt: true
+                // }
+            });
+            // we can delete the hash from the returned object
+            delete user.hash;
+
+            // return the saved user
+            return user
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError) {
+                if (error.code === "P2002") { // prisma error code for unique key constraint
+                    throw new ForbiddenException("User with same credentials exists");
+                }
+            }
+            throw error;
+        }
     }
 
     signIn() {
