@@ -10,6 +10,7 @@ export class UserController {
     // "/users/whoami"
     @Get("whoami")
     getWhoAmI(@GetUser() user: User) {
+        console.log("UserController::getWhoAmI(): ", user);
         return user;
     }
 

@@ -15,6 +15,7 @@ export class AuthService {
     ) {}
 
     async signUp(dto: AuthDto) {
+        console.log("AuthService::signUp(): ", dto);
         // generate the password hash
         const hash = await argon.hash(dto.password);
 
@@ -38,7 +39,9 @@ export class AuthService {
             if (error instanceof PrismaClientKnownRequestError) {
                 if (error.code === "P2002") {
                     // prisma error code for unique key constraint
-                    throw new ForbiddenException("User with same credentials exists");
+                    throw new ForbiddenException(
+                        "User with same credentials exists",
+                    );
                 }
             }
             throw error;
@@ -52,6 +55,7 @@ export class AuthService {
                 email: dto.email,
             },
         });
+        console.log("AuthService::signIn(): ", user, dto);
 
         // if user does not exist, throw exception
         if (!user) throw new ForbiddenException("Credentials incorrect");
@@ -60,7 +64,8 @@ export class AuthService {
         const passwordMatches = await argon.verify(user.hash, dto.password);
 
         // if password is incorrect, throw exception
-        if (!passwordMatches) throw new ForbiddenException("Credentials incorrect");
+        if (!passwordMatches)
+            throw new ForbiddenException("Credentials incorrect");
 
         // send back the user
         // delete user.hash;
@@ -69,7 +74,10 @@ export class AuthService {
         return this.signToken(user.id, user.email);
     }
 
-    async signToken(userId: number, email: string): Promise<{ accessToken: string }> {
+    async signToken(
+        userId: number,
+        email: string,
+    ): Promise<{ accessToken: string }> {
         const payload = {
             sub: userId, // sub - JWT standard for unique identifier
             email,
@@ -79,6 +87,8 @@ export class AuthService {
             expiresIn: "60m",
             secret: this.config.get("JWT_SECRET"),
         });
+
+        console.log("AuthService::signToken(): ", payload, token);
 
         return {
             accessToken: token,

@@ -13,6 +13,7 @@ export class JwtStrategy extends PassportStrategy(
         private config: ConfigService,
         private prisma: PrismaService,
     ) {
+        console.log("JwtStrategy::constructor() is called");
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: config.get("JWT_SECRET"),
@@ -26,6 +27,7 @@ export class JwtStrategy extends PassportStrategy(
                 id: payload.sub,
             },
         });
+        console.log("JwtStrategy::validate():", user);
         delete user.hash;
         return user; // this will append payload the request
     }
