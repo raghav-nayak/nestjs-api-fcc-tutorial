@@ -1,10 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import * as argon from 'argon2';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import * as argon from "argon2";
+import { PrismaService } from "src/prisma/prisma.service";
+import { AuthDto } from "./dto";
 
 @Injectable()
 export class AuthService {
@@ -36,9 +36,9 @@ export class AuthService {
             return this.signToken(user.id, user.email);
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError) {
-                if (error.code === 'P2002') {
+                if (error.code === "P2002") {
                     // prisma error code for unique key constraint
-                    throw new ForbiddenException('User with same credentials exists');
+                    throw new ForbiddenException("User with same credentials exists");
                 }
             }
             throw error;
@@ -54,13 +54,13 @@ export class AuthService {
         });
 
         // if user does not exist, throw exception
-        if (!user) throw new ForbiddenException('Credentials incorrect');
+        if (!user) throw new ForbiddenException("Credentials incorrect");
 
         // if exists, compare the password
         const passwordMatches = await argon.verify(user.hash, dto.password);
 
         // if password is incorrect, throw exception
-        if (!passwordMatches) throw new ForbiddenException('Credentials incorrect');
+        if (!passwordMatches) throw new ForbiddenException("Credentials incorrect");
 
         // send back the user
         // delete user.hash;
@@ -76,8 +76,8 @@ export class AuthService {
         };
 
         const token = await this.jwt.signAsync(payload, {
-            expiresIn: '15m',
-            secret: this.config.get('JWT_SECRET'),
+            expiresIn: "60m",
+            secret: this.config.get("JWT_SECRET"),
         });
 
         return {
