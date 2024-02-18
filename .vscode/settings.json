@@ -19,5 +19,8 @@
         "editor.tabShape": "round",
         "terminal.foreground": "#b5b9be",
         "terminal.background": "#121112"
-    }
+    },
+    "cSpell.words": [
+        "pactum"
+    ]
 }
