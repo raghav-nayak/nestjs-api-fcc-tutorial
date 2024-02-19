@@ -100,13 +100,24 @@ describe("App e2e", () => {
                     .spec()
                     .post("/auth/signin")
                     .withBody(dto)
-                    .expectStatus(HttpStatus.OK);
+                    .expectStatus(HttpStatus.OK)
+                    .stores("userAccessToken", "accessToken"); // userAccessToken is a variable that stores the token from the response
             });
         });
     });
 
     describe("User", () => {
-        describe("Who am I", () => {});
+        describe("Who am I", () => {
+            it("Should get current user details", () => {
+                return pactum
+                    .spec()
+                    .get("/users/whoami")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}", // to use the variable from the store
+                    })
+                    .expectStatus(HttpStatus.OK);
+            });
+        });
 
         describe("Edit user", () => {});
     });
@@ -116,8 +127,8 @@ describe("App e2e", () => {
 
         describe("Get bookmark by id", () => {});
 
-        describe("Edit bookmark", () => {});
+        describe("Edit bookmark by id", () => {});
 
-        describe("Delete bookmark", () => {});
+        describe("Delete bookmark by id", () => {});
     });
 });
