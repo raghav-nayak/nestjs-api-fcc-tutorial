@@ -1,6 +1,7 @@
 import { HttpStatus, INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import * as pactum from "pactum";
+import { EditUserDto } from "src/user/dto";
 import { AppModule } from "../src/app.module";
 import { AuthDto } from "../src/auth/dto";
 import { PrismaService } from "../src/prisma/prisma.service";
@@ -119,7 +120,24 @@ describe("App e2e", () => {
             });
         });
 
-        describe("Edit user", () => {});
+        describe("Edit user", () => {
+            it("Should edit user details", () => {
+                const dto: EditUserDto = {
+                    email: "tester@example.com",
+                    firstName: "Tester",
+                };
+                return pactum
+                    .spec()
+                    .patch("/users")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}", // to use the variable from the store
+                    })
+                    .withBody(dto)
+                    .expectStatus(HttpStatus.OK)
+                    .expectBodyContains(dto.email) // you can check the response body for a particular value is present or not
+                    .expectBodyContains(dto.firstName);
+            });
+        });
     });
 
     describe("Bookmark", () => {
