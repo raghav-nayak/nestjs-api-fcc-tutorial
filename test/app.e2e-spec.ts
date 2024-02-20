@@ -1,6 +1,7 @@
 import { HttpStatus, INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import * as pactum from "pactum";
+import { CreateBookmarkDto, EditBookmarkDto } from "src/bookmark/dto";
 import { EditUserDto } from "src/user/dto";
 import { AppModule } from "../src/app.module";
 import { AuthDto } from "../src/auth/dto";
@@ -141,16 +142,96 @@ describe("App e2e", () => {
     });
 
     describe("Bookmark", () => {
-        describe("Get empty bookmarks", () => {});
+        describe("Get empty bookmarks", () => {
+            it("Should get bookmarks", () => {
+                return pactum
+                    .spec()
+                    .get("/bookmarks")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .expectStatus(HttpStatus.OK)
+                    .expectBody([]);
+            });
+        });
 
-        describe("Create bookmark", () => {});
+        describe("Create bookmark", () => {
+            const dto: CreateBookmarkDto = {
+                title: "First Bookmark",
+                link: "https://google.com/",
+            };
+            it("Should create bookmark", () => {
+                return pactum
+                    .spec()
+                    .post("/bookmarks")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .withBody(dto)
+                    .expectStatus(HttpStatus.CREATED)
+                    .stores("bookmarkId", "id");
+            });
+        });
 
-        describe("Get bookmarks", () => {});
+        describe("Get bookmarks", () => {
+            it("Should get bookmarks", () => {
+                return pactum
+                    .spec()
+                    .get("/bookmarks")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .expectStatus(HttpStatus.OK)
+                    .expectJsonLength(1);
+            });
+        });
 
-        describe("Get bookmark by id", () => {});
+        describe("Get bookmark by id", () => {
+            it("Should get bookmarks", () => {
+                return pactum
+                    .spec()
+                    .get("/bookmarks/{id}")
+                    .withPathParams("id", "$S{bookmarkId}")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .expectStatus(HttpStatus.OK)
+                    .expectBodyContains("$S{bookmarkId}");
+            });
+        });
 
-        describe("Edit bookmark by id", () => {});
+        describe("Edit bookmark by id", () => {
+            const dto: EditBookmarkDto = {
+                title: "First modified Bookmark",
+                description: "First modified description",
+            };
+            it("Should edit bookmark", () => {
+                return pactum
+                    .spec()
+                    .patch("/bookmarks/{id}")
+                    .withPathParams("id", "$S{bookmarkId}")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .withBody(dto)
+                    .expectStatus(HttpStatus.OK)
+                    .expectBodyContains(dto.title)
+                    .expectBodyContains(dto.description);
+            });
+        });
 
-        describe("Delete bookmark by id", () => {});
+        describe("Delete bookmark by id", () => {
+            it("Should delete bookmark", () => {
+                return pactum
+                    .spec()
+                    .delete("/bookmarks/{id}")
+                    .withPathParams("id", "$S{bookmarkId}")
+                    .withHeaders({
+                        Authorization: "Bearer $S{userAccessToken}",
+                    })
+                    .expectStatus(HttpStatus.NO_CONTENT)
+                    .inspect();
+            });
+        });
     });
 });
